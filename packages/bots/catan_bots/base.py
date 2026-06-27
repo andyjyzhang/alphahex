@@ -16,20 +16,12 @@ class Bot(ABC):
 
 def create_bot(name: str) -> Bot:
     normalized = name.strip().lower()
-    if normalized == "random":
-        from catan_bots.random_bot import RandomBot
+    if normalized in {"mcts", "optimal"}:
+        from catan_bots.mcts_bot import MCTSBot
 
-        return RandomBot()
-    if normalized == "greedy":
-        from catan_bots.greedy_bot import GreedyBot
-
-        return GreedyBot()
-    if normalized == "heuristic":
-        from catan_bots.heuristic_bot import HeuristicBot
-
-        return HeuristicBot()
+        return MCTSBot()
     raise ValueError(f"unknown bot: {name}")
 
 
 def available_bots() -> list[str]:
-    return ["random", "greedy", "heuristic"]
+    return ["mcts"]

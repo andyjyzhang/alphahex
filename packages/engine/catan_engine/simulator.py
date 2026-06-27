@@ -127,8 +127,8 @@ def _final_state_summary(state) -> dict:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run standalone 1v1 Catan bot simulations.")
-    parser.add_argument("--bot-a", default="random")
-    parser.add_argument("--bot-b", default="random")
+    parser.add_argument("--bot-a", default="mcts")
+    parser.add_argument("--bot-b", default="mcts")
     parser.add_argument("--games", type=int, default=1)
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args(argv)

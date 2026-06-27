@@ -15,7 +15,7 @@ interact with any external game site.
   - `simulator.py`: bot-vs-bot runner and CLI.
   - `replay.py`: JSON replay persistence under `data/replays/`.
 - `packages/bots/catan_bots/`
-  - `RandomBot`, `GreedyBot`, `HeuristicBot`, and `create_bot()`.
+  - `MCTSBot` and `create_bot()`. `mcts` is the only supported bot.
 - `packages/api/catan_api/`
   - FastAPI app and routes for games, bots, and replays.
 
@@ -48,7 +48,7 @@ the currently installed FastAPI/Starlette stack.
 ## Run Simulations
 
 ```powershell
-python -m catan_engine.simulator --bot-a random --bot-b random --games 100 --seed 0
+python -m catan_engine.simulator --bot-a mcts --bot-b mcts --games 10 --seed 0
 ```
 
 The simulator prints:
@@ -86,6 +86,6 @@ smoke checks instead:
 
 ```powershell
 python -c "from catan_engine import initialize_game, get_legal_actions; s=initialize_game(seed=0); print(s.phase.name, len(get_legal_actions(s)))"
-python -c "from catan_bots import RandomBot; from catan_engine.simulator import run_many_games; s=run_many_games(RandomBot(), RandomBot(), 100, seed=0); print(s['games_played'], s['illegal_action_count'], s['crash_count'])"
+python -c "from catan_bots import MCTSBot; from catan_engine.simulator import run_many_games; s=run_many_games(MCTSBot(), MCTSBot(), 5, seed=0); print(s['games_played'], s['illegal_action_count'], s['crash_count'])"
 python -c "from fastapi.testclient import TestClient; from catan_api.app import app; c=TestClient(app); print(c.get('/health').json())"
 ```

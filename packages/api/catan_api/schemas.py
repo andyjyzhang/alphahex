@@ -15,7 +15,7 @@ class GameActionRequest(BaseModel):
 
 
 class BotMatchRequest(BaseModel):
-    bot_a: str = "random"
-    bot_b: str = "greedy"
+    bot_a: str = "mcts"
+    bot_b: str = "mcts"
     games: int = Field(default=10, ge=1)
     seed: int = 0
