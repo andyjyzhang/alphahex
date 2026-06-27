@@ -2,3 +2,7 @@
 .env
 __pycache__/
 data/replays/
+.npm-cache/
+node_modules/
+*.egg-info/
+web/dist/
