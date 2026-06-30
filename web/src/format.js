@@ -8,11 +8,11 @@ export const PLAYER_NAMES = { 0: "You", 1: "AlphaHex" };
 export const PLAYER_COLORS = { 0: "#c1432f", 1: "#2d5f86" };
 
 export const RESOURCE_META = {
-  LUMBER: { label: "Lumber", color: "#2f7d3b", emoji: "🌲" },
-  BRICK: { label: "Brick", color: "#b5562a", emoji: "🧱" },
-  WOOL: { label: "Wool", color: "#7bc043", emoji: "🐑" },
-  GRAIN: { label: "Grain", color: "#e0b13a", emoji: "🌾" },
-  ORE: { label: "Ore", color: "#6b7280", emoji: "⛰️" },
+  LUMBER: { label: "Lumber", color: "#2f7d3b", icon: "L" },
+  BRICK: { label: "Brick", color: "#b5562a", icon: "B" },
+  WOOL: { label: "Wool", color: "#7bc043", icon: "W" },
+  GRAIN: { label: "Grain", color: "#e0b13a", icon: "G" },
+  ORE: { label: "Ore", color: "#6b7280", icon: "O" },
 };
 
 export const HEX_META = {
@@ -27,16 +27,16 @@ export const HEX_META = {
 export const RESOURCE_ORDER = ["LUMBER", "BRICK", "WOOL", "GRAIN", "ORE"];
 
 export const DEV_CARD_META = {
-  KNIGHT: { label: "Knight", emoji: "⚔️" },
-  MONOPOLY: { label: "Monopoly", emoji: "🎩" },
-  YEAR_OF_PLENTY: { label: "Year of Plenty", emoji: "🎁" },
-  ROAD_BUILDING: { label: "Road Building", emoji: "🛤️" },
-  VICTORY_POINT: { label: "Victory Point", emoji: "⭐" },
+  KNIGHT: { label: "Knight", icon: "K" },
+  MONOPOLY: { label: "Monopoly", icon: "M" },
+  YEAR_OF_PLENTY: { label: "Year of Plenty", icon: "Y" },
+  ROAD_BUILDING: { label: "Road Building", icon: "R" },
+  VICTORY_POINT: { label: "Victory Point", icon: "VP" },
 };
 
 export const DEV_CARD_ORDER = ["KNIGHT", "MONOPOLY", "YEAR_OF_PLENTY", "ROAD_BUILDING", "VICTORY_POINT"];
 
-// Build costs (as lists of resource keys, for showing emoji icons).
+// Build costs (as lists of resource keys, for showing compact resource icons).
 export const BUILD_COST = {
   ROAD: ["LUMBER", "BRICK"],
   SETTLEMENT: ["LUMBER", "BRICK", "WOOL", "GRAIN"],
@@ -45,8 +45,8 @@ export const BUILD_COST = {
 };
 
 export const PHASE_LABEL = {
-  SETUP_SETTLEMENT: "Setup — place a settlement",
-  SETUP_ROAD: "Setup — place a road",
+  SETUP_SETTLEMENT: "Setup - place a settlement",
+  SETUP_ROAD: "Setup - place a road",
   ROLL: "Roll the dice",
   DISCARD: "Discard cards (rolled a 7)",
   MOVE_ROBBER: "Move the robber",
@@ -76,12 +76,34 @@ function resourceSummary(resources) {
   return parts.join(", ") || "nothing";
 }
 
+export function resourceGainLines(beforeState, afterState) {
+  if (!beforeState || !afterState) return [];
+  const lines = [];
+  for (const playerId of [0, 1]) {
+    const before = beforeState.players?.[playerId]?.resources ?? {};
+    const after = afterState.players?.[playerId]?.resources ?? {};
+    const gained = {};
+    for (const res of RESOURCE_ORDER) {
+      const delta = (after[res] ?? 0) - (before[res] ?? 0);
+      if (delta > 0) gained[res] = delta;
+    }
+    if (Object.keys(gained).length > 0) {
+      lines.push({
+        player: playerId,
+        text: `${PLAYER_NAMES[playerId] ?? `P${playerId}`} gained ${resourceSummary(gained)}.`,
+        kind: "gain",
+      });
+    }
+  }
+  return lines;
+}
+
 // Short label for a single action (used on buttons).
 export function actionLabel(action) {
   const p = action.payload ?? {};
   switch (action.action_type) {
     case "ROLL_DICE":
-      return "🎲 Roll dice";
+      return "Roll dice";
     case "END_TURN":
       return "End turn";
     case "BUY_DEV_CARD":
@@ -90,8 +112,8 @@ export function actionLabel(action) {
       return `Steal from ${PLAYER_NAMES[p.target_player] ?? `P${p.target_player}`}`;
     case "PLAY_KNIGHT":
       return p.target_player != null
-        ? `Knight → hex ${p.robber_hex_id} (rob ${PLAYER_NAMES[p.target_player]})`
-        : `Knight → hex ${p.robber_hex_id}`;
+        ? `Knight -> hex ${p.robber_hex_id} (rob ${PLAYER_NAMES[p.target_player]})`
+        : `Knight -> hex ${p.robber_hex_id}`;
     case "PLAY_MONOPOLY":
       return `Monopoly: ${RESOURCE_META[p.resource]?.label ?? p.resource}`;
     case "PLAY_YEAR_OF_PLENTY":
@@ -99,7 +121,7 @@ export function actionLabel(action) {
     case "PLAY_ROAD_BUILDING":
       return `Road Building: edges ${(p.edge_ids ?? []).join(" & ")}`;
     case "MARITIME_TRADE":
-      return `Trade ${p.give_count} ${RESOURCE_META[p.give]?.label ?? p.give} → 1 ${RESOURCE_META[p.receive]?.label ?? p.receive}`;
+      return `Trade ${p.give_count} ${RESOURCE_META[p.give]?.label ?? p.give} -> 1 ${RESOURCE_META[p.receive]?.label ?? p.receive}`;
     case "BUILD_SETTLEMENT":
     case "PLACE_SETTLEMENT":
       return `Settlement @ node ${p.node_id}`;

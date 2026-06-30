@@ -1,21 +1,14 @@
 import React, { useEffect } from "react";
-import {
-  DEV_CARD_META,
-  DEV_CARD_ORDER,
-  HEX_META,
-  RESOURCE_META,
-  RESOURCE_ORDER,
-} from "../format.js";
+import { DEV_CARD_META, DEV_CARD_ORDER, HEX_META, RESOURCE_META, RESOURCE_ORDER } from "../format.js";
 
 const DEV_MEANING = {
-  KNIGHT: "Move the robber & steal; 3 played = Largest Army (+2 VP)",
+  KNIGHT: "Move the robber and steal; 3 played = Largest Army (+2 VP)",
   MONOPOLY: "Name a resource; take every one from your opponent",
   YEAR_OF_PLENTY: "Take any 2 resources from the bank",
   ROAD_BUILDING: "Place 2 roads for free",
   VICTORY_POINT: "Worth 1 victory point (kept hidden)",
 };
 
-// Small board-piece glyphs (matches how pieces render on the board).
 const pieceColor = "#7a6a4e";
 function Settlement() {
   return (
@@ -66,44 +59,38 @@ function Row({ icon, name, meaning }) {
 
 export default function LegendModal({ onClose }) {
   useEffect(() => {
-    const onKey = (e) => e.key === "Escape" && onClose();
+    const onKey = (event) => event.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   return (
     <div className="legend-backdrop" onClick={onClose}>
-      <div className="legend-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="legend-modal" onClick={(event) => event.stopPropagation()}>
         <div className="legend-head">
           <span className="legend-title">Key</span>
-          <button className="legend-close" onClick={onClose} aria-label="Close">
-            ✕
-          </button>
+          <button className="legend-close" onClick={onClose} aria-label="Close">x</button>
         </div>
 
         <div className="legend-section">
-          <h3>Terrain &amp; resources</h3>
+          <h3>Terrain &amp; Resources</h3>
           <div className="legend-grid">
-            {RESOURCE_ORDER.map((r) => (
+            {RESOURCE_ORDER.map((resource) => (
               <Row
-                key={r}
-                icon={<span className="legend-swatch" style={{ background: HEX_META[r].color }} />}
-                name={HEX_META[r].label}
-                meaning={`${RESOURCE_META[r].emoji} ${RESOURCE_META[r].label}`}
+                key={resource}
+                icon={<span className="legend-swatch" style={{ background: HEX_META[resource].color }} />}
+                name={HEX_META[resource].label}
+                meaning={`${RESOURCE_META[resource].icon} = ${RESOURCE_META[resource].label}`}
               />
             ))}
-            <Row
-              icon={<span className="legend-swatch" style={{ background: HEX_META.DESERT.color }} />}
-              name="Desert"
-              meaning="produces nothing"
-            />
+            <Row icon={<span className="legend-swatch" style={{ background: HEX_META.DESERT.color }} />} name="Desert" meaning="produces nothing" />
           </div>
         </div>
 
         <div className="legend-section">
           <h3>Board</h3>
           <div className="legend-grid">
-            <Row icon={<span className="legend-token">8</span>} name="Number token" meaning="6 & 8 (red) roll most often; dots show odds" />
+            <Row icon={<span className="legend-token">8</span>} name="Number token" meaning="6 and 8 roll most often; dots show odds" />
             <Row icon={<Robber />} name="Robber" meaning="blocks its hex; moved on a 7 or by a Knight" />
             <Row icon={<span className="legend-port">3:1</span>} name="Port" meaning="coastal trade ratio (2:1 specific, 3:1 any)" />
           </div>
@@ -112,21 +99,21 @@ export default function LegendModal({ onClose }) {
         <div className="legend-section">
           <h3>Pieces</h3>
           <div className="legend-grid">
-            <Row icon={<Settlement />} name="Settlement" meaning="🏠 · 1 VP" />
-            <Row icon={<City />} name="City" meaning="🏛️ · 2 VP" />
-            <Row icon={<Road />} name="Road" meaning="🛣️ · longest = +2 VP" />
+            <Row icon={<Settlement />} name="Settlement" meaning="1 VP" />
+            <Row icon={<City />} name="City" meaning="2 VP" />
+            <Row icon={<Road />} name="Road" meaning="longest = +2 VP" />
           </div>
         </div>
 
         <div className="legend-section">
-          <h3>Development cards</h3>
+          <h3>Development Cards</h3>
           <div className="legend-list">
-            {DEV_CARD_ORDER.map((c) => (
+            {DEV_CARD_ORDER.map((card) => (
               <Row
-                key={c}
-                icon={<span className="legend-emoji">{DEV_CARD_META[c].emoji}</span>}
-                name={DEV_CARD_META[c].label}
-                meaning={DEV_MEANING[c]}
+                key={card}
+                icon={<span className="legend-icon-token">{DEV_CARD_META[card].icon}</span>}
+                name={DEV_CARD_META[card].label}
+                meaning={DEV_MEANING[card]}
               />
             ))}
           </div>

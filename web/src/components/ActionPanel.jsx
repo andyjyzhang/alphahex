@@ -6,7 +6,7 @@ import Dice from "./Dice.jsx";
 // The dice panel: the always-visible dice (clickable to roll on your turn) plus
 // the prompt for whatever forced sub-phase is active. The standing build / dev /
 // trade menu lives in ActionsPanel.
-export default function ActionPanel({ state, legalActions, onAction, busy, winner }) {
+export default function ActionPanel({ state, legalActions, onAction, busy, winner, botStatus }) {
   const isHumanTurn = state.current_player === HUMAN_ID && winner == null;
   const phase = state.phase;
 
@@ -20,11 +20,18 @@ export default function ActionPanel({ state, legalActions, onAction, busy, winne
   let prompt = null;
   if (winner != null) {
     prompt = <p className="muted">The game is over. Start a new game to play again.</p>;
+  } else if (botStatus) {
+    prompt = (
+      <p className="thinking">
+        <span className="thinking-dot" />
+        {botStatus}
+      </p>
+    );
   } else if (!isHumanTurn) {
     prompt = (
       <p className="thinking">
         <span className="thinking-dot" />
-        {PLAYER_NAMES[BOT_ID]} is plotting...
+        {PLAYER_NAMES[BOT_ID]} is thinking...
       </p>
     );
   } else if (phase === "DISCARD") {

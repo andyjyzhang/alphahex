@@ -5,7 +5,7 @@ import { HEX_META, PLAYER_COLORS, RESOURCE_META } from "../format.js";
 const NUMBER_DOTS = { 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3, 11: 2, 12: 1 };
 const SIZE = 56; // matches layout scale
 
-// The robber drawn as an SVG pawn (the emoji doesn't render on Windows).
+// The robber is drawn as an SVG pawn so it renders consistently on Windows.
 function Robber({ cx, cy, size }) {
   const s = size / 56;
   return (
@@ -132,7 +132,7 @@ export default function Board({
             </text>
             {p.port.kind !== "generic" && (
               <text className="port-res" x={0} y={9} textAnchor="middle">
-                {RESOURCE_META[p.port.resource]?.emoji ?? ""}
+                {RESOURCE_META[p.port.resource]?.icon ?? ""}
               </text>
             )}
           </g>
@@ -172,7 +172,7 @@ export default function Board({
                   {hex.number}
                 </text>
                 <text x={hex.x} y={hex.y + SIZE * 0.15} textAnchor="middle" dominantBaseline="middle" className={hot ? "token-dots hot" : "token-dots"}>
-                  {"•".repeat(NUMBER_DOTS[hex.number] ?? 0)}
+                  {"o".repeat(NUMBER_DOTS[hex.number] ?? 0)}
                 </text>
               </g>
             )}
@@ -180,6 +180,14 @@ export default function Board({
               <g>
                 <circle cx={hex.x} cy={hex.y} r={SIZE * 0.34} className="robber-ring" />
                 <Robber cx={hex.x} cy={hex.y} size={SIZE} />
+                {hex.number != null && (
+                  <g transform={`translate(${hex.x}, ${hex.y + SIZE * 0.44})`} className="blocked-token">
+                    <rect x="-24" y="-10" width="48" height="18" rx="5" />
+                    <text x="0" y="0" textAnchor="middle" dominantBaseline="middle">
+                      blocked {hex.number}
+                    </text>
+                  </g>
+                )}
               </g>
             )}
           </g>

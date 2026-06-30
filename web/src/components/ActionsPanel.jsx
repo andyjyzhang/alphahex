@@ -7,7 +7,9 @@ function Cost({ cost }) {
   return (
     <span className="action-cost">
       {cost.map((r, i) => (
-        <span key={i}>{RESOURCE_META[r].emoji}</span>
+        <span key={i} className="mini-resource" style={{ "--res": RESOURCE_META[r].color }} title={RESOURCE_META[r].label}>
+          {RESOURCE_META[r].icon}
+        </span>
       ))}
     </span>
   );

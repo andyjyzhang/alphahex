@@ -7,9 +7,10 @@ import PlayerPanel from "./components/PlayerPanel.jsx";
 import BankPanel from "./components/BankPanel.jsx";
 import LegendModal from "./components/LegendModal.jsx";
 import * as api from "./api.js";
-import { BOT_ID, HUMAN_ID, logLine, PLAYER_NAMES } from "./format.js";
+import { actionLabel, BOT_ID, HUMAN_ID, logLine, PLAYER_NAMES, resourceGainLines } from "./format.js";
 
-const BOT_MOVE_DELAY_MS = 450;
+const BOT_THINK_DELAY_MS = 900;
+const BOT_REVEAL_DELAY_MS = 700;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Placement actions ask for a confirmation before being applied.
@@ -33,36 +34,54 @@ export default function App() {
   const [showKey, setShowKey] = useState(false); // legend modal
   const [actionMode, setActionMode] = useState(null); // armed board action (build/knight/road-building)
   const [roadFirst, setRoadFirst] = useState(null); // first edge picked for Road Building
+  const [botStatus, setBotStatus] = useState(null);
 
   const startedRef = useRef(false);
   const botRunningRef = useRef(false);
+  const botRunIdRef = useRef(0);
 
-  const appendLog = useCallback((action) => {
+  const appendLog = useCallback((action, beforeState = null, afterState = null) => {
     const text = logLine(action);
-    if (text == null) return; // skipped actions (dice rolls, end turn)
-    setLog((prev) => [...prev, { text, player: action.player_id }]);
+    const entries = [];
+    if (text != null) entries.push({ text, player: action.player_id, kind: "action" });
+    entries.push(...resourceGainLines(beforeState, afterState));
+    if (entries.length === 0) return;
+    setLog((prev) => [...prev, ...entries]);
   }, []);
 
   // Drive the bot until it is the human's turn again (or the game ends).
   const driveBot = useCallback(
     async (startState, startWinner) => {
       if (botRunningRef.current) return;
+      const runId = ++botRunIdRef.current;
       botRunningRef.current = true;
       let state = startState;
       let winner = startWinner;
       try {
         while (winner == null && state.current_player !== HUMAN_ID) {
-          await sleep(BOT_MOVE_DELAY_MS);
+          setBotStatus(`${PLAYER_NAMES[BOT_ID]} is thinking...`);
+          await sleep(BOT_THINK_DELAY_MS);
+          if (runId !== botRunIdRef.current) return;
+          setBotStatus(`${PLAYER_NAMES[BOT_ID]} is choosing a move...`);
           const resp = await api.botStep(state);
-          if (resp.action) appendLog(resp.action);
+          if (runId !== botRunIdRef.current) return;
+          if (resp.action) {
+            appendLog(resp.action, state, resp.state);
+            setBotStatus(`${PLAYER_NAMES[BOT_ID]} chose ${actionLabel(resp.action)}.`);
+          }
           state = resp.state;
           winner = resp.winner;
           setGame({ state, legal_actions: resp.legal_actions, winner });
+          await sleep(BOT_REVEAL_DELAY_MS);
+          if (runId !== botRunIdRef.current) return;
         }
       } catch (err) {
         setError(String(err.message ?? err));
       } finally {
-        botRunningRef.current = false;
+        if (runId === botRunIdRef.current) {
+          botRunningRef.current = false;
+          setBotStatus(null);
+        }
       }
     },
     [appendLog]
@@ -75,6 +94,9 @@ export default function App() {
   }, []);
 
   const startNewGame = useCallback(async () => {
+    botRunIdRef.current += 1;
+    botRunningRef.current = false;
+    setBotStatus(null);
     setBusy(true);
     setError(null);
     resetTargeting();
@@ -105,7 +127,7 @@ export default function App() {
       resetTargeting();
       try {
         const resp = await api.applyAction(game.state, action);
-        appendLog(action);
+        appendLog(action, game.state, resp.state);
         setGame({ state: resp.state, legal_actions: resp.legal_actions, winner: resp.winner });
         if (resp.winner == null && resp.state.current_player !== HUMAN_ID) {
           await driveBot(resp.state, resp.winner);
@@ -119,9 +141,8 @@ export default function App() {
     [game, busy, appendLog, driveBot, resetTargeting]
   );
 
-  // Highlight sets + click resolution. Forced phases (setup placement, robber
-  // move) auto-highlight their spots; during MAIN nothing highlights until the
-  // player arms an action from the menu (actionMode).
+  // Highlight sets + click resolution. Forced phases always show targets. In
+  // MAIN, legal build targets also appear without opening the side menu first.
   const { highlight, resolveNode, resolveEdge, resolveHex } = useMemo(() => {
     const nodes = new Set();
     const cities = new Set();
@@ -153,6 +174,15 @@ export default function App() {
 
     // ---- MAIN: only the armed action highlights its spots ----
     if (phase === "MAIN") {
+      if (actionMode == null) {
+        each("BUILD_SETTLEMENT", (p) => nodes.add(p.node_id));
+        each("BUILD_CITY", (p) => cities.add(p.node_id));
+        each("BUILD_ROAD", (p) => edges.add(p.edge_id));
+        return wrap({
+          resolveNode: (id) => findBy("BUILD_CITY", "node_id", id) ?? findBy("BUILD_SETTLEMENT", "node_id", id),
+          resolveEdge: (id) => findBy("BUILD_ROAD", "edge_id", id),
+        });
+      }
       if (actionMode === "BUILD_SETTLEMENT") {
         each("BUILD_SETTLEMENT", (p) => nodes.add(p.node_id));
         return wrap({ resolveNode: (id) => findBy("BUILD_SETTLEMENT", "node_id", id) });
@@ -329,6 +359,7 @@ export default function App() {
             onAction={handleAction}
             busy={busy}
             winner={winner}
+            botStatus={botStatus}
           />
         </aside>
 
@@ -341,14 +372,14 @@ export default function App() {
           {error && <div className="error-banner">{error}</div>}
           {winner != null && (
             <div className={`winner-banner ${winner === HUMAN_ID ? "win" : "lose"}`}>
-              {winner === HUMAN_ID ? "🎉 You won!" : "🤖 The bot won."} — start a new game to play again.
+              {winner === HUMAN_ID ? "You won." : "The bot won."} Start a new game to play again.
             </div>
           )}
         </div>
       </div>
 
       <footer className="credits">
-        Licensed under MIT ·{" "}
+        Licensed under MIT -{" "}
         <a href="https://github.com/andyjyzhang/catan" target="_blank" rel="noopener noreferrer">
           GitHub
         </a>

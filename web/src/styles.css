@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   /* Cartographer's table palette */
   --paper: #e7d9bb;
   --paper-edge: #ddcaa3;
@@ -364,6 +364,18 @@ h3 {
   stroke-width: 0.6;
   stroke-linejoin: round;
 }
+.blocked-token rect {
+  fill: rgba(36, 28, 17, 0.82);
+  stroke: #f3ead2;
+  stroke-width: 0.8;
+}
+.blocked-token text {
+  fill: #fff4d8;
+  font-family: "Archivo", sans-serif;
+  font-size: 8.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
 
 /* Ports */
 .port-dock {
@@ -520,6 +532,10 @@ h3 {
   padding: 2px 7px;
   border-radius: 4px;
 }
+.badge.danger {
+  background: linear-gradient(180deg, #b84f35, #7f2d18);
+  color: #fff5ee;
+}
 .resources {
   display: flex;
   gap: 5px;
@@ -533,10 +549,20 @@ h3 {
   text-align: center;
   padding: 5px 0 4px;
 }
-.resource-emoji {
+.resource-icon {
   display: block;
-  font-size: 15px;
-  line-height: 1.1;
+  width: 22px;
+  height: 22px;
+  margin: 0 auto 3px;
+  border-radius: 50%;
+  background: var(--res, #d6c08f);
+  border: 1px solid rgba(61, 44, 24, 0.28);
+  color: #2c2418;
+  font-family: "Archivo", sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 20px;
+  text-align: center;
 }
 .resource-count {
   font-family: "Archivo", sans-serif;
@@ -567,6 +593,10 @@ h3 {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+}
+.stockpile .warn {
+  color: #9b361f;
+  font-weight: 700;
 }
 /* dot separators between stats */
 .stockpile > span:not(:last-child)::after {
@@ -853,8 +883,19 @@ h3 {
   height: 14px;
   border-radius: 50%;
 }
-.legend-emoji {
-  font-size: 17px;
+.legend-icon-token {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #f3ead2;
+  border: 1px solid rgba(0, 0, 0, 0.22);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Archivo", sans-serif;
+  font-size: 11px;
+  font-weight: 800;
 }
 .legend-token {
   width: 22px;
@@ -1052,8 +1093,19 @@ button:disabled {
   background: #efdcae;
   box-shadow: 0 0 0 1px var(--brass);
 }
-.res-chip-emoji {
-  font-size: 18px;
+.res-chip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--res, #d6c08f);
+  border: 1px solid rgba(61, 44, 24, 0.28);
+  color: #2c2418;
+  font-family: "Archivo", sans-serif;
+  font-size: 11px;
+  font-weight: 800;
 }
 .res-chip-ratio {
   font-size: 9px;
@@ -1136,8 +1188,19 @@ button:disabled {
   background: #efdcae;
   box-shadow: 0 0 0 1px var(--brass);
 }
-.dev-card-emoji {
-  font-size: 14px;
+.dev-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ede0bd;
+  border: 1px solid rgba(61, 44, 24, 0.22);
+  color: #3b2d18;
+  font-family: "Archivo", sans-serif;
+  font-size: 9px;
+  font-weight: 800;
   line-height: 1;
 }
 .dev-card-count {
@@ -1160,9 +1223,19 @@ button:disabled {
   border-radius: 7px;
   padding: 6px 0 4px;
 }
-.bank-emoji {
-  font-size: 16px;
-  line-height: 1.1;
+.bank-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--res, #d6c08f);
+  border: 1px solid rgba(61, 44, 24, 0.28);
+  color: #2c2418;
+  font-family: "Archivo", sans-serif;
+  font-size: 11px;
+  font-weight: 800;
 }
 .bank-count {
   font-weight: 700;
@@ -1221,6 +1294,21 @@ button:disabled {
   display: inline-flex;
   gap: 1px;
   flex: 0 0 auto;
+}
+.mini-resource {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--res, #d6c08f);
+  border: 1px solid rgba(61, 44, 24, 0.24);
+  color: #2c2418;
+  font-family: "Archivo", sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
 }
 .actions-hint {
   margin: 2px 0 8px;
@@ -1317,6 +1405,10 @@ button:disabled {
 }
 .log-entry:last-of-type {
   border-bottom: none;
+}
+.log-entry.gain .log-text {
+  color: #356530;
+  font-weight: 600;
 }
 .log-dot {
   width: 8px;

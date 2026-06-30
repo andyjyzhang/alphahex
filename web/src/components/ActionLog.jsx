@@ -13,7 +13,7 @@ export default function ActionLog({ entries }) {
       <div className="log-list">
         {entries.length === 0 && <p className="muted">No actions yet. Place your first settlement to begin.</p>}
         {entries.map((entry, i) => (
-          <div className="log-entry" key={i}>
+          <div className={`log-entry ${entry.kind ?? "action"}`} key={i}>
             <span className="log-dot" style={{ background: PLAYER_COLORS[entry.player] ?? "#888" }} />
             <span className="log-text">{entry.text}</span>
           </div>
